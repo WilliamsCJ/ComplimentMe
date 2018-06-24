@@ -1,0 +1,30 @@
+language: python
+python:
+- '2.7'
+sudo: true
+env:
+  global:
+  - AWS_DEFAULT_REGION=eu-west-1
+  - PYTHONPATH=$TRAVIS_BUILD_DIR:$PYTHONPATH
+  # - secure: X9GCZ94bRc8cn2hb6KNHGzyKqholVeZXsjXeln/nbqJZPbBMuJ9SIt7ivqvysDhusct9q5ikVoV6cqAS8c+LuuQ6CL+RiaECq9gvvJoHjYB9j6ABQTtwZAFISfmYjRurK6mgiJpIX9lgcl7ct/u2WOmqfwJvc20jhmdYnxdnW9+zyRtSaoMdsOYgFT/qGPnbHOfPqUzOMXTSqk8gLHfxy1NMYua5aMCrzOHVR4/uTVUChzSaIiE3HPxYhkUkSgSIhKmQmHxBbA3UuUVjrKSCAzb9PKSYgCPnEt1RjPf7jfmvd7FhIrNlW9ierr8Iu9GjbyEoW9UUNELbT7RJHf4XmBCGIBm7PBBlUXabqPZ/9eZJ3Qc/5DvmoFBrksEhmtpLySPIOU37QMqOQWPQcsrzSdwMZ5YE51k19+zzGb7d5Xwl8kMXUo+W146MCjQRth/qCBarJL3SIJkn5xBu+9Q6z7iT8ixBg/M47jHEgW2VQEyC63X7obFAvN8fwakYIYydshtGdNjeu9RYpNOq7F/cLieoeuIpzUXFITmHn2F4ydD9EdbF8/mn5QBelaQo/PvYiW6bEgSseg82nlObAHkV4zUYt/RGsNglosRfNjRAXnFWXyTwa0n8Rjl4RSrJZq3IZoChnetUrARbdxYqD+zDvxmd+T6PJmwn5bTnT8EJ2xk=
+install:
+- pip install pytest
+- pip install awscli
+script: true
+before_deploy:
+- make
+- mv dist/lambda.zip dist/latest.zip
+- cp dist/latest.zip dist/$TRAVIS_COMMIT.zip
+deploy:
+  provider: s3
+  bucket: compliment-me-s3
+  access_key_id: $AWS_ACCESS_KEY_ID
+  secret_access_key: $AWS_SECRET_ACCESS_KEY
+  region: eu-west-1
+  local-dir: dist
+  acl: private
+  skip_cleanup: true
+  on:
+    branch: master
+after_deploy:
+  - aws lambda update-function-code --function-name AlexaChristmasCountdown --s3-bucket compliment-me-s3 --s3-key latest.zip
