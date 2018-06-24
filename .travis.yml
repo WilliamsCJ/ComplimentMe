@@ -27,4 +27,4 @@ deploy:
   on:
     branch: master
 after_deploy:
-  - aws lambda update-function-code --function-name AlexaChristmasCountdown --s3-bucket compliment-me-s3 --s3-key latest.zip
+  - aws lambda update-function-code --function-name ComplimentMe --s3-bucket compliment-me-s3 --s3-key latest.zip
